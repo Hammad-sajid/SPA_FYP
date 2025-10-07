@@ -1,0 +1,216 @@
+import React from 'react';
+import { Card, Row, Col, Button, Badge, Alert } from 'react-bootstrap';
+import { FaLightbulb, FaClock, FaExclamationTriangle, FaPlus, FaChartBar, FaTasks } from 'react-icons/fa';
+
+const TaskResults = ({ suggestions, onAnalyzeConflicts, onBack, onAddTask }) => {
+  if (!suggestions || suggestions.length === 0) {
+    return (
+      <div>
+        <Alert variant="info">
+          <FaChartBar className="me-2" />
+          No task suggestions found. Try adjusting your criteria.
+        </Alert>
+        <Button variant="outline-primary" onClick={onBack}>
+          ← Back to Form
+        </Button>
+      </div>
+    );
+  }
+
+  const getTimeOfDay = (hour) => {
+    if (hour < 12) return { text: 'Morning', variant: 'primary' };
+    if (hour < 17) return { text: 'Afternoon', variant: 'warning' };
+    return { text: 'Evening', variant: 'success' };
+  };
+
+  const getScoreVariant = (score) => {
+    if (score >= 90) return 'success';
+    if (score >= 70) return 'warning';
+    return 'danger';
+  };
+
+  const getScoreText = (score) => {
+    if (score >= 90) return 'Excellent';
+    if (score >= 70) return 'Good';
+    if (score >= 50) return 'Fair';
+    return 'Poor';
+  };
+
+  const getWorkloadVariant = (workload) => {
+    if (workload === 'Good') return 'success';
+    if (workload === 'Moderate') return 'warning';
+    return 'danger';
+  };
+
+  return (
+    <div>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h5 className="mb-1">💡 Smart Task Scheduling Suggestions</h5>
+          <p className="text-muted mb-0">Found {suggestions.length} optimal time slots for your task</p>
+        </div>
+        <Button variant="outline-primary" onClick={onBack}>
+          ← BACK TO FORM
+        </Button>
+      </div>
+
+      <Row>
+        {suggestions.map((slot, index) => {
+          const timeOfDay = getTimeOfDay(slot.start_hour);
+          const scoreVariant = getScoreVariant(slot.final_score);
+          const scoreText = getScoreText(slot.final_score);
+          const workloadVariant = getWorkloadVariant(slot.workload_balance);
+          
+          return (
+            <Col key={index} lg={4} md={6} className="mb-4">
+              <Card className="h-100 shadow-sm">
+                <Card.Header 
+                  className={`text-white ${
+                    index < 3 ? 'bg-danger' : 'bg-secondary'
+                  }`}
+                >
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      {index < 3 ? (
+                        <>
+                          <FaLightbulb className="me-2" />
+                          Top Pick
+                        </>
+                      ) : (
+                        <>
+                          <FaClock className="me-2" />
+                          Option {index + 1}
+                        </>
+                      )}
+                    </div>
+                    <Badge bg="light" text="dark" className="fs-6">
+                      {slot.final_score}/100
+                    </Badge>
+                  </div>
+                </Card.Header>
+                
+                <Card.Body>
+                  <div className="text-center mb-3">
+                    <h4 className="mb-1">{slot.start_time}</h4>
+                    <p className="text-muted mb-2">to {slot.end_time}</p>
+                    <Badge bg={timeOfDay.variant} className="fs-6">
+                      {timeOfDay.text}
+                    </Badge>
+                  </div>
+
+                  <div className="mb-3">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span className="fw-bold">Overall Score</span>
+                      <span className={`text-${scoreVariant} fw-bold`}>{scoreText}</span>
+                    </div>
+                    <div className="progress mb-3" style={{ height: '8px' }}>
+                      <div 
+                        className={`progress-bar bg-${scoreVariant}`} 
+                        style={{ width: `${slot.final_score}%` }}
+                      ></div>
+                    </div>
+                    
+                    <Row className="text-center">
+                      <Col>
+                        <div className="text-success">
+                          <FaChartBar className="me-1" />
+                          <strong>{slot.base_score || slot.score}</strong>
+                        </div>
+                        <small className="text-muted">Base</small>
+                      </Col>
+                      <Col>
+                        <div className="text-warning">
+                          <FaExclamationTriangle className="me-1" />
+                          <strong>{slot.conflicts || 0}</strong>
+                        </div>
+                        <small className="text-muted">Conflicts</small>
+                      </Col>
+                      <Col>
+                        <div className="text-info">
+                          <FaClock className="me-1" />
+                          <strong>{slot.gap_violations || 0}</strong>
+                        </div>
+                        <small className="text-muted">Gaps</small>
+                      </Col>
+                    </Row>
+                  </div>
+
+                  {/* Task-specific information */}
+                  <div className="mb-3">
+                    <Row className="text-center">
+                      <Col>
+                        <strong>Duration</strong>
+                        <br />
+                        <small className="text-muted">
+                          {slot.formData && slot.formData.duration ? 
+                            `${slot.formData.duration} min` : 
+                            `${slot.duration_hours}h`
+                          }
+                        </small>
+                      </Col>
+                      <Col>
+                        <strong>Start Hour</strong>
+                        <br />
+                        <small className="text-muted">{slot.start_time}</small>
+                      </Col>
+                    </Row>
+                  </div>
+
+                  {/* Task priority and urgency */}
+                  <div className="mb-3">
+                    <Row className="text-center">
+                      <Col>
+                        <Badge bg="info" className="mb-1">
+                          Priority: {slot.task_priority_bonus}
+                        </Badge>
+                      </Col>
+                      <Col>
+                        <Badge bg="warning" className="mb-1">
+                          Urgency: {slot.task_urgency_bonus}
+                        </Badge>
+                      </Col>
+                    </Row>
+                    <div className="text-center mt-2">
+                      <Badge bg={workloadVariant}>
+                        <FaTasks className="me-1" />
+                        Workload: {slot.workload_balance}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="d-grid gap-2">
+                    <Button 
+                      variant="success" 
+                      size="sm"
+                      onClick={() => onAddTask(slot)}
+                      className="mb-2"
+                    >
+                      <FaPlus className="me-2" />
+                      Add Task
+                    </Button>
+                    <Button 
+                      variant="outline-warning" 
+                      size="sm"
+                      onClick={() => onAnalyzeConflicts(slot.id || `task_slot_${index}`)}
+                    >
+                      <FaExclamationTriangle className="me-2" />
+                      Workload Analysis
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          );
+        })}
+      </Row>
+
+      <Alert variant="info" className="mt-4">
+        <strong>💡 How to use:</strong> Click "Add Task" to create a task at the suggested time, 
+        or "Workload Analysis" to see detailed information about your current workload and scheduling conflicts.
+      </Alert>
+    </div>
+  );
+};
+
+export default TaskResults;
+

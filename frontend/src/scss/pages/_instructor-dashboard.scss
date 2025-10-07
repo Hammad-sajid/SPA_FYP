@@ -1,0 +1,63 @@
+.courses-chart{
+	.ic-icon{
+		height: 2rem;
+		width: 2rem;
+		border-radius: 0.625rem;
+		background: $secondary;
+		text-align: center;
+		line-height: 2rem;
+		@include custommq ($max:1600px){
+			height:1.5rem;
+			width:1.5rem;
+			line-height:1.3rem;
+			border-radius:3px;
+		}
+	}
+}
+.pt-line{
+	margin-top: 1.5rem;
+}
+.work-ic{
+	height: 3.75rem;
+    width: 3.75rem;
+    border: 0.125rem solid #DBDBDB;
+    display: block;
+    text-align: center;
+    line-height: 3.4375rem;
+	border-radius:$radius;
+	@include respond ('phone'){
+		height: 2.8125rem;
+		width: 2.8125rem;
+		line-height: 2.5rem;
+	}
+	&:hover{
+		background:var(--rgba-primary-1);
+		border-color:var(--primary);
+	}
+}
+#earningtBar{
+	margin-top: -1.4rem;
+}
+
+//Custom css
+.instructor-calendar{
+	.react-calendar{
+		.react-calendar__tile{
+			padding: 7px;
+			&.react-calendar__month-view__days__day{
+				height: unset;
+			}
+			&.react-calendar__tile--now{			
+				background: var(--secondary)!important;
+				&:before{
+					background: #000 !important;
+				}
+			}
+		}
+	}
+	
+	button.react-calendar__tile.react-calendar__tile--now.react-calendar__month-view__days__day,
+	button.react-calendar__tile.react-calendar__tile--active.react-calendar__tile--range.react-calendar__tile--rangeStart.react-calendar__tile--rangeEnd.react-calendar__tile--rangeBothEnds.react-calendar__month-view__days__day {
+		background: var(--secondary)!important;
+	}
+}
